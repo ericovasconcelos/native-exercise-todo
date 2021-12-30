@@ -13,9 +13,10 @@ export function Home() {
   }
 
   function handleToggleTaskDone(id: number) {
-    const newTask = tasks.find(task => task.id === id);
+    const oldTasks = tasks.map(task => ({...task}));
+    const newTask = oldTasks.find(task => task.id === id);
     if(newTask) {
-      const updatedTasks = tasks.filter(task => task.id !== id);
+      const updatedTasks = oldTasks.filter(task => task.id !== id);
       newTask.done = !newTask?.done;
       setTasks([...updatedTasks, newTask]);
     }
