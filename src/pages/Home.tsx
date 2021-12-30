@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { Alert, StyleSheet, View, AlertButton } from 'react-native';
 
 import { Header } from '../components/Header';
 import { Task, TasksList } from '../components/TasksList';
@@ -9,22 +9,48 @@ export function Home() {
   const [tasks, setTasks] = useState<Task[]>([]);
 
   function handleAddTask(newTaskTitle: string) {
+    const existingTast = tasks.find(task => task.title === newTaskTitle);
+    if (existingTast) {
+      return Alert.alert('Task já cadastrada', 'Você não pode cadastrar uma task com o mesmo nome.');
+    }
     setTasks([...tasks, { id: new Date().getTime(), title: newTaskTitle, done: false }]);
   }
 
   function handleToggleTaskDone(id: number) {
-    const oldTasks = tasks.map(task => ({...task}));
+    const oldTasks = tasks.map(task => ({ ...task }));
     const newTask = oldTasks.find(task => task.id === id);
-    if(newTask) {
+    if (newTask) {
       const updatedTasks = oldTasks.filter(task => task.id !== id);
       newTask.done = !newTask?.done;
       setTasks([...updatedTasks, newTask]);
     }
   }
 
+  function handleEditTask(taskId: number, taskNewTitle: string) {
+    const oldTasks = tasks.map(task => ({ ...task }));
+    const newTask = oldTasks.find(task => task.id === Number(taskId));
+    if (newTask) {
+      const updatedTasks = oldTasks.filter(task => task.id !== taskId);
+      newTask.title = taskNewTitle;
+      setTasks([...updatedTasks, newTask]);
+    }
+  }
+
+
   function handleRemoveTask(id: number) {
-    const filteredTasts = tasks.filter(t => t.id !== id);
-    setTasks(filteredTasts);
+    Alert.alert('Remover item', 'Tem certeza que você deseja remover esse item?', [
+      {
+        style: 'cancel',
+        text: 'Não',
+      }, {
+        style:'destructive',
+        text: 'Sim',
+        onPress: () => {
+          const filteredTasts = tasks.filter(t => t.id !== id);
+          setTasks(filteredTasts);
+        }
+      }
+    ])
   }
 
   return (
@@ -37,6 +63,7 @@ export function Home() {
         tasks={tasks}
         toggleTaskDone={handleToggleTaskDone}
         removeTask={handleRemoveTask}
+        editTask={handleEditTask}
       />
     </View>
   )
